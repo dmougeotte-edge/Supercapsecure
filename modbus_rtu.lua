@@ -4,7 +4,7 @@ print("Using libmodbus runtime version:", mb.version())
 print("Using lua-libmodbus compiled version:", mb.VERSION_STRING)
 
 -- MQTT Config
-HOST  = "192.168.1.1"
+HOST  = "192.168.1.218"
 PORT  = 1883
 TOPIC = "LTRX/test"
 
@@ -14,16 +14,13 @@ BAUDRATE    = 9600
 PARITY      = "N"              -- "N", "E", "O"
 DATA_BITS   = 8
 STOP_BITS   = 1
-SLAVE_ID    = 2
+SLAVE_ID    = 7
 
 -- Create RTU device
 dev = mb.new_rtu(SERIAL_PORT, BAUDRATE, PARITY, DATA_BITS, STOP_BITS)
 
 -- Optional debug
 dev:set_debug()
-
--- IMPORTANT: Set serial mode (RS485 typically)
--- dev:rtu_set_serial_mode(mb.RTU_RS485)   -- uncomment if supported
 
 -- Set slave ID
 dev:set_slave(SLAVE_ID)
@@ -34,29 +31,41 @@ if not ok then
     error("RTU connect failed: " .. err)
 end
 
+-- IMPORTANT: Set serial mode (RS485 typically)
+ok, err = dev:rtu_get_serial_mode()
+print( "get ok=" .. tostring(ok) .. " err=" .. tostring(err))
+ok, err = dev:rtu_set_serial_mode(mb.RTU_RS485)
+print( "set ok=" .. tostring(ok) .. " err=" .. tostring(err))
+ok, err = dev:rtu_set_rs485_mode(mb.RTU_RS485_HALF)
+print( "set ok=" .. tostring(ok) .. " err=" .. tostring(err))
+--ok, err = dev:rtu_set_rs485_mode(mb.RTU_RS485_FULL)
+--print( "set ok=" .. tostring(ok) .. " err=" .. tostring(err))
+ok, err = dev:rtu_get_serial_mode()
+print( "get ok=" .. tostring(ok) .. " err=" .. tostring(err))
+
 print("Connected to Modbus RTU device")
 
 -- Read registers
-local cregs, err = dev:read_bits(4096, 2)
-if not cregs then
+local cregs, err = dev:read_bits(10, 2)
+if err then
     error("Read failed: " .. err)
 end
 
 -- Read registers
-local iregs, err = dev:read_input_bits(4096, 2)
-if not iregs then
+local iregs, err = dev:read_input_bits(20, 2)
+if err then
     error("Read failed: " .. err)
 end
 
 -- Read registers
-local hregs, err = dev:read_registers(4096, 2)
-if not hregs then
+local hregs, err = dev:read_registers(30, 2)
+if err then
     error("Read failed: " .. err)
 end
 
 -- Read registers
-local regs, err = dev:read_input_registers(4096, 2)
-if not regs then
+local regs, err = dev:read_input_registers(40, 2)
+if err then
     error("Read failed: " .. err)
 end
 
